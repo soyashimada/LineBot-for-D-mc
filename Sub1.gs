@@ -1,4 +1,4 @@
-//質問回答機能
+//Q&A 質問回答機能
 function replyFromSheet(e) {
   //シートの最終行を取得
   var lastRow = faq.getLastRow();
@@ -33,9 +33,9 @@ function replyFromSheet(e) {
   return messageArray;
 }  
 
-//フォーム送信時メッセージが送られようにトリガー作成関数
+//フォーム送信時メッセージが送られるようにトリガー作成関数
 function createTrigger (){
-  var entry_form = FormApp.openById('18WDUZNaLOgTtvULLAdhugBbuXfsKTFynbpcchC73WuQ');
+  var entry_form = FormApp.openById('FORM_ID');
   ScriptApp.newTrigger("pushContactForm").forForm(entry_form).onFormSubmit().create();
 }
 
@@ -51,12 +51,12 @@ function pushMessageFromForm (e) {
 
     for(var i=1; i<=formidList.length; i++){
       if(formidList[i][0] == postbackData[0]){       
-        //NOだった場合
+        //送信予約確認がNOだった場合
         if(postbackData[1] == "NO"){      
           reserve_record.deleteRow(i+1);
           return "送信予約をキャンセルしました。";
 
-        //YESだった場合
+        //送信予約確認がYESだった場合
         }else if(postbackData[1] == "YES"){
           //userdata_sort から登録者の名前とIDを取得
           var namelastRow = ud_sort.getRange(1, 5).getNextDataCell(SpreadsheetApp.Direction.DOWN).getRow();
@@ -78,7 +78,7 @@ function pushMessageFromForm (e) {
           //IDが見つからなかった人を格納する配列
           var error_nameList = [];
 
-        　//送信者のIDを格納する
+        　//送信者リストのIDを格納する
           var targetIDs = [];
           for(var k=0; k<pushMembers.length; k++){
             for(var t=0; t<nameList.length; t++){
@@ -87,7 +87,7 @@ function pushMessageFromForm (e) {
                 break;
               }
               if(t == nameList.length - 1){
-                //IDが見つからなければ格納
+                //IDが見つからなければ別の配列に格納
                 error_nameList.push(pushMembers[k]);
               }
             }
@@ -100,7 +100,7 @@ function pushMessageFromForm (e) {
           //メッセージを送信
           pushMessage(targetIDs,pushContent);
           
-          //送信元への報告メッセージ
+          //フォーム回答者への報告メッセージ
           var toSender = ["送信が完了しました。"]
           if(error_nameList.length != 0){
             var text = "以下の人には送信ができませんでした。公式LINEを追加してもらうか、直接連絡してください。\n--------------"
@@ -127,8 +127,9 @@ function pushMessageFromForm (e) {
   }
 }
 
+//イベントのエントリーフォーム
 function pushEntryForm (e) {
-  var entry_form = FormApp.openById('1DQ1IROcKS16lGqmxzt6MiOyB1DO6JofEaXv53avIurk');
+  var entry_form = FormApp.openById('FORM_ID');
   //userdata_sort から登録者の名前とIDを取得
   var namelastRow = ud_sort.getRange(1, 5).getNextDataCell(SpreadsheetApp.Direction.DOWN).getRow();
   var nameLists = ud_sort.getRange(2,5,namelastRow-1).getValues();
@@ -171,6 +172,7 @@ function pushEntryForm (e) {
   }
 }
 
+//フォームで回答した名簿から、その名簿のLINE名リストを送信する機能
 function pushConfirmAction () {
   //userdata_sort から登録者の名前とIDを取得
   var namelastRow = ud_sort.getRange(1, 5).getNextDataCell(SpreadsheetApp.Direction.DOWN).getRow();
@@ -417,7 +419,7 @@ function pushConfirmAction () {
   }
 }
 
-//LINE名が被っていた場合などに、氏名からプロフィール画像を返す機能
+//送られてきた氏名からその人のプロフィール画像を返す機能
 function searchUserPicture (e) {
   const userID = e.source.userId;
   //userdata_sort から登録者の名前とIDを取得
@@ -492,7 +494,7 @@ function pushContactForm (e) {
   return;
 }
 
-//定期的にLINE名を更新する機能
+//定期的に登録者のLINE名を更新する機能
 function updateLineName () {
   //userdata_sort から登録者の名前とIDを取得
   var namelastRow = ud.getLastRow()
