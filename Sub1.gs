@@ -159,7 +159,7 @@ function pushEntryForm (e) {
   }
 
   if(junre_num == "0"){
-    pushMessage(senderID,"玉見山祭 エントリー完了しました。")
+    pushMessage(senderID,"〇〇〇 エントリー完了しました。")
   }else{
     var firstjunre = itemResp[5].getResponse();
     var secondjunre = itemResp[7].getResponse();
@@ -167,7 +167,7 @@ function pushEntryForm (e) {
     var fourthjunre = itemResp[11].getResponse();
     var fifthjunre = itemResp[13].getResponse();
 
-    var text = ["玉見山祭 エントリー完了しました。エントリーは以下の通りです。","名前："+sender+"\n希望ジャンル数："+ junre_num +"\n第1希望："+firstjunre+"\n第2希望："+secondjunre+"\n第3希望："+thirdjunre+"\n第4希望："+fourthjunre+"\n第5希望："+fifthjunre,"エントリー情報が誤っていた場合は、もう一度回答してください。"];
+    var text = ["〇〇〇 エントリー完了しました。エントリーは以下の通りです。","名前："+sender+"\n希望ジャンル数："+ junre_num +"\n第1希望："+firstjunre+"\n第2希望："+secondjunre+"\n第3希望："+thirdjunre+"\n第4希望："+fourthjunre+"\n第5希望："+fifthjunre,"エントリー情報が誤っていた場合は、もう一度回答してください。"];
     pushMessage(senderID,text);
   }
 }
