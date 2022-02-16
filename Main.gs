@@ -4,6 +4,7 @@ const push_url = 'https://api.line.me/v2/bot/message/push';
 const multi_url = 'https://api.line.me/v2/bot/message/multicast';
 const adminID = 'ADMIN_ID';
 
+//ユーザーデータなどを管理するデータベース代わりのスプレッドシート
 var ss = SpreadsheetApp.openById("SPREADSHEET_ID");
 var ud = ss.getSheetByName("userdata");
 var gd = ss.getSheetByName("groupdata");
@@ -11,28 +12,41 @@ var faq = ss.getSheetByName("FAQ");
 var log = ss.getSheetByName("log");
 var ud_sort = ss.getSheetByName("userdata_sort");
 var reserve_record = ss.getSheetByName("送信予約");
+
+//LINEBotを操作するフォーム
 var push_form = FormApp.openById('FORM_ID');
 
  
+
 function doPost(e) {
     var json = e.postData.contents;
     var events = JSON.parse(json).events;
     
     events.forEach(function(e) {
       var reply_message = "原因不明のエラーです。ブロックしてしばらくしてブロック解除してみてください。";
+     
       switch(e.type){
+        //友達登録された場合
         case "follow":
           console.log("follow action accepted");
           reply_message = follow(e);
           break;
+        
+        //メッセージが送られてきた場合
         case "message":
         if(e.source.type == "user"){
+         
+         //DB代わりのスプレッドシートからユーザーデータを参照
           var status = confirmUserStatus(e);
             switch(status){
+              
+              //Botを友達登録しただけの人
               case "followed":
                   console.log("register action runned");
                   reply_message = register(e);
                 break;
+              
+              //Botにアカウント登録した人
               case "registered": 
                 var receiveText = e.message.text; 
                 if(receiveText == "辞書"){
@@ -55,7 +69,9 @@ function doPost(e) {
                   console.log("not reply ")
                   return ;
                 }
-                break;　
+                break;
+              
+              //Q&A機能を使おうとしてる人
               case "question":
                 if(changeUserStatus(e,"registered") == 1){
                   reply_message = replyFromSheet(e);
@@ -64,6 +80,8 @@ function doPost(e) {
                   reply_message = "エラーが発生しました。";
                 }             
                 break;
+              
+              //アカウント登録者の画像情報取得機能を使おうとしてる人
               case "searchPicture":
                 if(changeUserStatus(e,"registered") == 1){
                   searchUserPicture(e);
@@ -85,12 +103,18 @@ function doPost(e) {
           pushMessage(adminID,"イベントタイプが判別できませんでした。");
           reply_message = "エラーが発生しました。";
         }
+        
+        //グループに入った場合
         case "join":
           if(e.source.type == "group") reply_message = registerGroup(e);
           else if(e.source.type == "room") reply_message = registerRoom(e);
+        
+        //ブロックされた場合
         case "unfollow":
           unfollow(e);
           return ;
+        
+        //ポストバックアクションの場合
         case "postback":
           reply_message = pushMessageFromForm(e);
       }
@@ -115,10 +139,10 @@ function follow(e){
   }
 } 
 
-//登録機能
+//アカウント登録機能
 function register(e){
   try{
-    //メッセージからユーザーIDと入力情報を取得し、「登録」の文字部分を削除、配列化
+    //メッセージからユーザーIDと入力情報を取得し、配列化
     var userID = e.source.userId;
     if(e.message.text.indexOf("\n") != -1){
       var info = e.message.text.split("\n");
@@ -156,7 +180,7 @@ function register(e){
           }
         }
 
-        //userDataにIDがない場合
+        //userDataシートにIDがない場合
         ud.appendRow(ary[0]);
         return "登録できました！\n入力ありがとうございます！";
 
